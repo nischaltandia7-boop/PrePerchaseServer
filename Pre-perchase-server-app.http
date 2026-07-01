@@ -1,0 +1,6 @@
+@Pre_perchase_server_app_HostAddress = http://localhost:5073
+
+GET {{Pre_perchase_server_app_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
