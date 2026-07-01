@@ -59,8 +59,13 @@ builder.Services.AddSingleton<IAmazonS3>(sp =>
         Amazon.RegionEndpoint.APSouth1
     );
 });
-
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
