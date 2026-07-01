@@ -63,13 +63,24 @@ namespace PrePerchaseServer.Models.cities.service
             await _repo.AddAsync(city);
             await _repo.SaveAsync();
 
-            return await GetByIdAsync(city.Id)!;
+            var createdCity = await GetByIdAsync(city.Id);
+
+            if (createdCity == null)
+            {
+            throw new InvalidOperationException("Failed to retrieve the newly created city.");
+            }
+
+            return createdCity;
         }
 
         public async Task<CityResponseDto?> UpdateAsync(int id, UpdateCityDto dto)
         {
             var city = await _repo.GetByIdAsync(id);
-            if (city == null) return null;
+            if (city == null)
+            {
+                throw new InvalidOperationException("Failed to retrieve the updated city.");
+            }
+            ;
 
             city.Name = dto.Name;
             city.State = dto.State;

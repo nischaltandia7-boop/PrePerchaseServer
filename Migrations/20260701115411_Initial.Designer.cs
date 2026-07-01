@@ -13,8 +13,8 @@ using PrePerchaseServer.Data;
 namespace Pre_perchase_server_app.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260701080010_initail")]
-    partial class initail
+    [Migration("20260701115411_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
