@@ -5,7 +5,7 @@
 namespace Pre_perchase_server_app.Migrations
 {
     /// <inheritdoc />
-    public partial class splitquery : Migration
+    public partial class SplitQuery : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

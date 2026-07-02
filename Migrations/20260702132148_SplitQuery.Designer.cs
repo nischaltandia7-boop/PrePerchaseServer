@@ -13,8 +13,8 @@ using PrePerchaseServer.Data;
 namespace Pre_perchase_server_app.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260702050819_splitquery")]
-    partial class splitquery
+    [Migration("20260702132148_SplitQuery")]
+    partial class SplitQuery
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
