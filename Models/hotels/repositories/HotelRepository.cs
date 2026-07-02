@@ -21,6 +21,7 @@ namespace PrePerchaseServer.Models.hotel.repository
                 .Include(h => h.CancellationPolicies)
                     .ThenInclude(p => p.Slabs)
                 .Include(h => h.HotelImages)
+                .AsSplitQuery()
                 .ToListAsync();
         }
 
@@ -32,6 +33,7 @@ namespace PrePerchaseServer.Models.hotel.repository
                 .Include(h => h.CancellationPolicies)
                     .ThenInclude(p => p.Slabs)
                 .Include(h => h.HotelImages)
+                .AsSplitQuery()
                 .FirstOrDefaultAsync(h => h.Id == id);
         }
 
