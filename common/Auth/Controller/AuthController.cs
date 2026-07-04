@@ -92,4 +92,17 @@ public class AuthController : ControllerBase
             message = "Logged out successfully."
         });
     }
+    
+    [Authorize]
+    [HttpPost("change-password")]
+    public async Task<ActionResult<AuthResponseDto>> ChangePassword(
+        [FromBody] ChangePasswordDto dto)
+    {
+        var response = await _authService.ChangePasswordAsync(User, dto);
+
+        if (!response.Success)
+            return BadRequest(response);
+
+        return Ok(response);
+    }
 }

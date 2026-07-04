@@ -9,4 +9,7 @@ public interface IAuthService
     Task<AuthResponseDto> RefreshTokenAsync(RefreshTokenDto dto);
     Task<UserDto?> GetCurrentUserAsync(ClaimsPrincipal user);
     Task LogoutAsync(ClaimsPrincipal user);
+    Task<AuthResponseDto> ChangePasswordAsync(
+        ClaimsPrincipal user,
+        ChangePasswordDto dto);
 }

@@ -9,6 +9,7 @@ public class AuthResponseDto
     public string AccessToken { get; set; } = string.Empty;
 
     public string RefreshToken { get; set; } = string.Empty;
+    public bool RequiresPasswordChange { get; set; }
 
     public DateTime ExpiresAt { get; set; }
 

@@ -61,14 +61,14 @@ public class AuthService : IAuthService
         return new AuthResponseDto
         {
             Success = true,
-            Message = "Login successful.",
+            Message = user.MustChangePassword
+                ? "Password change required."
+                : "Login successful.",
 
             AccessToken = _jwtTokenService.GenerateAccessToken(user),
-
             RefreshToken = user.RefreshToken,
-
             ExpiresAt = DateTime.UtcNow.AddMinutes(60),
-
+            RequiresPasswordChange = user.MustChangePassword,
             User = UserMapper.MapToDto(user)
         };
     }
@@ -85,14 +85,21 @@ public class AuthService : IAuthService
         {
             Id = Guid.NewGuid(),
             Username = dto.Username,
-            PasswordHash = PasswordHasher.HashPassword(dto.Password),
+
+            // Keeping your current implementation
+            PasswordHash = PasswordHasher.HashPassword(dto.Email),
+
             FullName = dto.FullName,
             Email = dto.Email,
             PhoneNumber = dto.PhoneNumber,
             Role = dto.Role,
             Status = dto.Status,
+
+            MustChangePassword = true,
+
             RefreshToken = _jwtTokenService.GenerateRefreshToken(),
             RefreshTokenExpiry = _jwtTokenService.GetRefreshTokenExpiry(),
+
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -103,40 +110,60 @@ public class AuthService : IAuthService
         {
             Success = true,
             Message = "User created successfully.",
+
             AccessToken = _jwtTokenService.GenerateAccessToken(user),
+
             RefreshToken = user.RefreshToken!,
+
             ExpiresAt = DateTime.UtcNow.AddMinutes(60),
+
+            RequiresPasswordChange = true,
+
             User = UserMapper.MapToDto(user)
         };
-        {
-            if (await _userRepository.UsernameExistsAsync(dto.Username))
-                throw new Exception("Username already exists.");
-            if (await _userRepository.EmailExistsAsync(dto.Email))
-                throw new Exception("Email already exists.");
-            var user1 = new User
-            {
-                Id = Guid.NewGuid(),
-                Username = dto.Username,
-                PasswordHash = PasswordHasher.HashPassword(dto.Password),
-                FullName = dto.FullName,
-                Email = dto.Email,
-                PhoneNumber = dto.PhoneNumber,
-                Role = dto.Role,
-                Status = dto.Status,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
-            await _userRepository.CreateAsync(user1);
-            return new AuthResponseDto
-            {
-                Success = true,
-                Message = "User created successfully.",
-                AccessToken = _jwtTokenService.GenerateAccessToken(user1),
-                RefreshToken = user1.RefreshToken,
-                User = UserMapper.MapToDto(user1)
-            };
-        }
     }
+
+    public async Task<AuthResponseDto> ChangePasswordAsync(
+        ClaimsPrincipal principal,
+        ChangePasswordDto dto)
+    {
+        var id = principal.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrWhiteSpace(id))
+            throw new Exception("Invalid user.");
+
+        var user = await _userRepository.GetByIdAsync(Guid.Parse(id));
+
+        if (user == null)
+            throw new Exception("User not found.");
+
+        if (!PasswordHasher.VerifyPassword(dto.CurrentPassword, user.PasswordHash))
+            throw new Exception("Current password is incorrect.");
+
+        user.PasswordHash = PasswordHasher.HashPassword(dto.NewPassword);
+        user.MustChangePassword = false;
+        user.PasswordChangedAt = DateTime.UtcNow;
+        user.UpdatedAt = DateTime.UtcNow;
+
+        await _userRepository.UpdateAsync(user);
+
+        return new AuthResponseDto
+        {
+            Success = true,
+            Message = "Password changed successfully.",
+
+            AccessToken = _jwtTokenService.GenerateAccessToken(user),
+
+            RefreshToken = user.RefreshToken!,
+
+            ExpiresAt = DateTime.UtcNow.AddMinutes(60),
+
+            RequiresPasswordChange = false,
+
+            User = UserMapper.MapToDto(user)
+        };
+    }
+
     public async Task<AuthResponseDto> RefreshTokenAsync(RefreshTokenDto dto)
     {
         throw new NotImplementedException();
