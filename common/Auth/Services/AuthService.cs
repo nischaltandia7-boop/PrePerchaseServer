@@ -91,6 +91,8 @@ public class AuthService : IAuthService
             PhoneNumber = dto.PhoneNumber,
             Role = dto.Role,
             Status = dto.Status,
+            RefreshToken = _jwtTokenService.GenerateRefreshToken(),
+            RefreshTokenExpiry = _jwtTokenService.GetRefreshTokenExpiry(),
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -101,10 +103,40 @@ public class AuthService : IAuthService
         {
             Success = true,
             Message = "User created successfully.",
+            AccessToken = _jwtTokenService.GenerateAccessToken(user),
+            RefreshToken = user.RefreshToken!,
+            ExpiresAt = DateTime.UtcNow.AddMinutes(60),
             User = UserMapper.MapToDto(user)
         };
+        {
+            if (await _userRepository.UsernameExistsAsync(dto.Username))
+                throw new Exception("Username already exists.");
+            if (await _userRepository.EmailExistsAsync(dto.Email))
+                throw new Exception("Email already exists.");
+            var user1 = new User
+            {
+                Id = Guid.NewGuid(),
+                Username = dto.Username,
+                PasswordHash = PasswordHasher.HashPassword(dto.Password),
+                FullName = dto.FullName,
+                Email = dto.Email,
+                PhoneNumber = dto.PhoneNumber,
+                Role = dto.Role,
+                Status = dto.Status,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+            await _userRepository.CreateAsync(user1);
+            return new AuthResponseDto
+            {
+                Success = true,
+                Message = "User created successfully.",
+                AccessToken = _jwtTokenService.GenerateAccessToken(user1),
+                RefreshToken = user1.RefreshToken,
+                User = UserMapper.MapToDto(user1)
+            };
+        }
     }
-
     public async Task<AuthResponseDto> RefreshTokenAsync(RefreshTokenDto dto)
     {
         throw new NotImplementedException();
