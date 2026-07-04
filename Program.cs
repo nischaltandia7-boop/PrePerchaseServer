@@ -8,6 +8,7 @@ using PrePerchaseServer.Data;
 using PrePerchaseServer.Modules.Auth;
 using PrePerchaseServer.Modules.Auth.Repositories;
 using PrePerchaseServer.Modules.Auth.Services;
+using PrePerchaseServer.Modules.Auth.Seed;
 
 // Existing Modules
 using PrePerchaseServer.Models.amenities.repository;
@@ -24,24 +25,31 @@ using PrePerchaseServer.Models.roomcategory.repository;
 using PrePerchaseServer.Models.roomcategory.service;
 using PrePerchaseServer.Models.stay_highlight.repositories;
 using PrePerchaseServer.Models.stay_highlight.service;
-using PrePerchaseServer.Modules.Auth.Seed;
 
 var builder = WebApplication.CreateBuilder(args);
+
+#region Controllers
 
 builder.Services
     .AddControllers()
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        options.JsonSerializerOptions.Converters.Add(
+            new JsonStringEnumConverter());
     });
 
-builder.Services.AddOpenApi();
+
+#endregion
+
+#region Database
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
+#endregion
 
 #region Authentication
 
@@ -87,16 +95,14 @@ builder.Services.AddScoped<IHotelService, HotelService>();
 builder.Services.AddScoped<IRoomCategoryService, RoomCategoryService>();
 builder.Services.AddScoped<IMediabankService, MediabankService>();
 builder.Services.AddScoped<StorageService>();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 #endregion
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
-}
+#region Database Migration & Seed
 
 using (var scope = app.Services.CreateScope())
 {
@@ -107,14 +113,24 @@ using (var scope = app.Services.CreateScope())
     await AuthSeeder.SeedAsync(db);
 }
 
+#endregion
+
+#region Middleware
+
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
+app.UseHttpsRedirection();
+
 app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.MapControllers();
+
+#endregion
 
 app.Run();

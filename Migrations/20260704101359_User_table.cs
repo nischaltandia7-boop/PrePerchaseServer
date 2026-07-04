@@ -5,7 +5,7 @@
 namespace Pre_perchase_server_app.Migrations
 {
     /// <inheritdoc />
-    public partial class seed_file : Migration
+    public partial class User_table : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
