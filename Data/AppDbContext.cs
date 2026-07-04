@@ -11,6 +11,8 @@ using PrePerchaseServer.Models.hotel.enums;
 using PrePerchaseServer.Models.roomcategory;
 using PrePerchaseServer.Models.roomcategory.enums;
 using PrePerchaseServer.Models.mediaBank;
+using PrePerchaseServer.Modules.Auth.DTOs;
+using PrePerchaseServer.Modules.Auth.Entities;
 
 namespace PrePerchaseServer.Data
 {
@@ -32,6 +34,7 @@ namespace PrePerchaseServer.Data
         public DbSet<HotelCancellationPolicy> HotelCancellationPolicies { get; set; }
         public DbSet<HotelCancellationPolicySlab> HotelCancellationPolicySlabs { get; set; }
         public DbSet<Mediabank> Mediabank => Set<Mediabank>();
+        public DbSet<User> Users { get; set; }
 
         // 🔥 THIS IS WHERE YOUR CODE GOES
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -293,6 +296,58 @@ namespace PrePerchaseServer.Data
                     .WithMany(a => a.AmenitiesImages)
                     .HasForeignKey(x => x.AmenitiesId)
                     .OnDelete(DeleteBehavior.Cascade);
+            });
+            
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.ToTable("users");
+
+                entity.HasKey(x => x.Id);
+
+                entity.Property(x => x.Id)
+                    .ValueGeneratedOnAdd();
+
+                entity.Property(x => x.Username)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.HasIndex(x => x.Username)
+                    .IsUnique();
+
+                entity.Property(x => x.PasswordHash)
+                    .IsRequired();
+
+                entity.Property(x => x.FullName)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(x => x.Email)
+                    .IsRequired()
+                    .HasMaxLength(150);
+
+                entity.HasIndex(x => x.Email)
+                    .IsUnique();
+
+                entity.Property(x => x.PhoneNumber)
+                    .HasMaxLength(20);
+
+                entity.Property(x => x.Role)
+                    .HasConversion<string>()
+                    .IsRequired();
+
+                entity.Property(x => x.Status)
+                    .HasConversion<string>()
+                    .IsRequired();
+
+                entity.Property(x => x.RefreshToken);
+
+                entity.Property(x => x.RefreshTokenExpiry);
+
+                entity.Property(x => x.CreatedAt)
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.Property(x => x.UpdatedAt)
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
             });
         }
     }

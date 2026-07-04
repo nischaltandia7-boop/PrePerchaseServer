@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PrePerchaseServer.Models.hotel.dto;
 using PrePerchaseServer.Models.hotel.service;
@@ -6,6 +7,7 @@ namespace PrePerchaseServer.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class HotelsController : ControllerBase
     {
         private readonly IHotelService _service;
