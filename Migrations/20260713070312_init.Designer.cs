@@ -13,8 +13,8 @@ using PrePerchaseServer.Data;
 namespace Pre_perchase_server_app.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260704101359_User_table")]
-    partial class User_table
+    [Migration("20260713070312_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -517,6 +517,12 @@ namespace Pre_perchase_server_app.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
+
+                    b.Property<bool>("MustChangePassword")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("PasswordChangedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
