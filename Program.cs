@@ -3,6 +3,7 @@ using Amazon;
 using Amazon.S3;
 using Microsoft.EntityFrameworkCore;
 using PrePerchaseServer.Data;
+using MediatR;
 
 // Auth
 using PrePerchaseServer.Modules.Auth;
@@ -29,6 +30,11 @@ using PrePerchaseServer.Models.stay_highlight.service;
 var builder = WebApplication.CreateBuilder(args);
 
 #region Controllers
+
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
+});
 
 builder.Services
     .AddControllers()

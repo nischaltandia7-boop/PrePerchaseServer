@@ -1,5 +1,9 @@
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using PrePerchaseServer.Models.amenities.service;
+using PrePerchaseServer.Models.amenities.Commands.CreateAmenity;
+using PrePerchaseServer.Models.amenities.Commands.DeleteAmenity;
+using PrePerchaseServer.Models.amenities.Commands.UpdateAmenity;
+using PrePerchaseServer.Models.amenities.Queries.GetAmenities;
 using PrePerchaseServer.Models.features.dto;
 
 namespace PrePerchaseServer.Controllers
@@ -8,24 +12,25 @@ namespace PrePerchaseServer.Controllers
     [Route("api/[controller]")]
     public class AmenitiesController : ControllerBase
     {
-        private readonly IAmenitiesService _amenitiesService;
+        private readonly IMediator _mediator;
 
-        public AmenitiesController(IAmenitiesService amenitiesService)
+        public AmenitiesController(IMediator mediator)
         {
-            _amenitiesService = amenitiesService;
+            _mediator = mediator;
         }
 
         [HttpGet]
         public async Task<ActionResult<List<AmenitiesResponseDto>>> GetAll()
         {
-            var amenities = await _amenitiesService.GetAllAsync();
+            var amenities = await _mediator.Send(new GetAmenitiesQuery());
+
             return Ok(amenities);
         }
 
         [HttpGet("{slug}")]
         public async Task<ActionResult<AmenitiesResponseDto>> GetBySlug(string slug)
         {
-            var amenity = await _amenitiesService.GetBySlugAsync(slug);
+            var amenity = await _mediator.Send(new GetAmenityBySlugQuery(slug));
 
             if (amenity == null)
                 return NotFound();
@@ -38,7 +43,7 @@ namespace PrePerchaseServer.Controllers
         {
             try
             {
-                var created = await _amenitiesService.CreateAsync(dto);
+                var created = await _mediator.Send(new CreateAmenityCommand(dto));
 
                 return CreatedAtAction(
                     nameof(GetBySlug),
@@ -56,7 +61,8 @@ namespace PrePerchaseServer.Controllers
             string slug,
             CreateAmenitiesDto dto)
         {
-            var updated = await _amenitiesService.UpdateAsync(slug, dto);
+            var updated = await _mediator.Send(
+                new UpdateAmenityCommand(slug, dto));
 
             if (updated == null)
                 return NotFound();
@@ -67,7 +73,8 @@ namespace PrePerchaseServer.Controllers
         [HttpDelete("{slug}")]
         public async Task<IActionResult> Delete(string slug)
         {
-            var deleted = await _amenitiesService.DeleteAsync(slug);
+            var deleted = await _mediator.Send(
+                new DeleteAmenityCommand(slug));
 
             if (!deleted)
                 return NotFound();
