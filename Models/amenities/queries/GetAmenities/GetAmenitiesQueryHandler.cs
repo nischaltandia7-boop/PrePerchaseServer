@@ -5,8 +5,7 @@ using PrePerchaseServer.Models.features.dto;
 
 namespace PrePerchaseServer.Models.amenities.Queries.GetAmenities;
 public class GetAmenitiesQueryHandler
-    : IRequestHandler<GetAmenitiesQuery, List<AmenitiesResponseDto>>,
-      IRequestHandler<GetAmenityBySlugQuery, AmenitiesResponseDto?>
+    : IRequestHandler<GetAmenitiesQuery, List<AmenitiesResponseDto>>
 {
     private readonly IAmenitiesRepository _repo;
 
@@ -23,28 +22,6 @@ public class GetAmenitiesQueryHandler
 
         return amenities.Select(Map).ToList();
     }
-    public async Task<AmenitiesResponseDto?> Handle(
-        GetAmenityBySlugQuery request,
-        CancellationToken cancellationToken)
-    {
-        var amenity = await _repo.GetBySlugAsync(request.Slug);
-
-        if (amenity == null)
-            return null;
-
-        return new AmenitiesResponseDto
-        {
-            Id = amenity.Id,
-            Name = amenity.Name,
-            Slug = amenity.Slug,
-            Type = amenity.Type,
-            IconId = amenity.IconId,
-            Status = amenity.Status,
-            CreatedAt = amenity.CreatedAt,
-            UpdatedAt = amenity.UpdatedAt
-        };
-    }
-
     private static AmenitiesResponseDto Map(Amenities amenity)
     {
         return new AmenitiesResponseDto
